@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import AWS from 'aws-sdk';
 import './App.css';
 
-// AWS Configuration
-AWS.config.update({
-  region: 'us-east-1', // ✅ Replace with your actual region
-  credentials: new AWS.Credentials('ACCESS_KEY', 'SECRET_KEY'), // 🔐 Replace with your credentials or use Cognito/Amplify in production
+// ✅ AWS Configuration using Cognito Identity Pool
+AWS.config.region = 'us-east-1'; // ✅ Your region
+AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+  IdentityPoolId: 'us-east-1:f5c550d6-12c4-4194-b8a5-50038e28818b', // ✅ Replace with your Cognito Identity Pool ID
 });
 
 const s3 = new AWS.S3();
@@ -23,22 +23,31 @@ function App() {
 
     setLoading(true);
 
-    const params = {
-      Bucket: 'image-upload-bucket', // ✅ Replace with your actual bucket name
-      Key: file.name,
-      Body: file,
-      ContentType: file.type,
-    };
-
-    s3.upload(params, (err, data) => {
+    // 🔄 Refresh credentials before upload
+    AWS.config.credentials.refresh((err) => {
       if (err) {
-        console.error('Upload error', err);
+        console.error('Credential refresh error:', err);
+        alert('AWS credentials error');
         setLoading(false);
-        alert('Upload failed');
       } else {
-        console.log('Upload success', data);
-        // Wait for labels to be processed in backend
-        setTimeout(() => fetchLabels(file.name), 5000);
+        const params = {
+          Bucket: 'image-upload-bucket-7', // ✅ Replace with your actual bucket name
+          Key: file.name,
+          Body: file,
+          ContentType: file.type,
+        };
+
+        s3.upload(params, (err, data) => {
+          if (err) {
+            console.error('Upload error', err);
+            alert('Upload failed');
+          } else {
+            console.log('Upload success', data);
+            // Wait for labels to be processed in backend
+            setTimeout(() => fetchLabels(file.name), 5000);
+          }
+          setLoading(false);
+        });
       }
     });
   };
