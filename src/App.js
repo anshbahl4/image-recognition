@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import AWS from 'aws-sdk';
 import './App.css';
 
-// ✅ AWS Configuration using Cognito Identity Pool
-AWS.config.region = 'us-east-1'; // ✅ Your region
+
+AWS.config.region = 'us-east-1'; 
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-  IdentityPoolId: 'us-east-1:f5c550d6-12c4-4194-b8a5-50038e28818b', // ✅ Replace with your Cognito Identity Pool ID
+  IdentityPoolId: 'us-east-1:f5c550d6-12c4-4194-b8a5-50038e28818b', 
 });
 
 const s3 = new AWS.S3();
@@ -23,7 +23,7 @@ function App() {
 
     setLoading(true);
 
-    // 🔄 Refresh credentials before upload
+    
     AWS.config.credentials.refresh((err) => {
       if (err) {
         console.error('Credential refresh error:', err);
@@ -31,7 +31,7 @@ function App() {
         setLoading(false);
       } else {
         const params = {
-          Bucket: 'image-upload-bucket-7', // ✅ Replace with your actual bucket name
+          Bucket: 'image-upload-bucket-7', 
           Key: file.name,
           Body: file,
           ContentType: file.type,
@@ -43,7 +43,7 @@ function App() {
             alert('Upload failed');
           } else {
             console.log('Upload success', data);
-            // Wait for labels to be processed in backend
+            
             setTimeout(() => fetchLabels(file.name), 5000);
           }
           setLoading(false);
